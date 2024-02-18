@@ -1,4 +1,5 @@
 from enum import Enum
+from pydantic import BaseModel
 
 from fastapi import FastAPI
 
@@ -68,3 +69,30 @@ async def read_items1(item_id: str, q: str | None = None, short: bool = False):
             {"description": "This is an amazing item that has a long descr"}
         )
     return item
+
+
+class OrderItem(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+
+@app.post("/order-items/")
+async def create_item(item: OrderItem):
+    item_dict = item.dict()
+    if item.tax:
+        price_with_tax = item.price + item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+
+    return item_dict
+
+
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: OrderItem, q: str | None = None):
+    result = {"item_id": item_id, **item.dict()}
+
+    if q:
+        result.update({"q": q})
+
+    return result
