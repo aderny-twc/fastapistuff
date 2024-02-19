@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from typing import Annotated
 
 app = FastAPI()
@@ -120,6 +120,29 @@ async def get_positions(q: Annotated[str | None, Query(alias="item-query", depre
 @app.get("/things/")
 async def get_things(q: Annotated[str | None, Query(alias="item-query", include_in_schema=False)] = None):
     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+
+    return results
+
+
+@app.get("/some_values/{value_id}")
+async def get_some_values(value_id: Annotated[int, Path(title="ID of a value")], q: Annotated[str | None, Query(alias="item-query")] = None):
+    results = {"value_id": value_id}
+    if q:
+        results.update({"q": q})
+
+    return results
+
+
+@app.get("/handy_order/{item_id}")
+async def read_values(*, item_id: int = Path(title="Title"), q: str):
+    return []
+
+
+@app.get("/numbers/{num_id}")
+async def get_numbers(num_id: Annotated[int, Path(gt=0, le=1000)], q: str):
+    results = {"num_id": num_id}
     if q:
         results.update({"q": q})
 
