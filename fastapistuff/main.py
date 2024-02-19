@@ -1,7 +1,8 @@
 from enum import Enum
 from pydantic import BaseModel
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
+from typing import Annotated
 
 app = FastAPI()
 
@@ -96,3 +97,30 @@ async def update_item(item_id: int, item: OrderItem, q: str | None = None):
         result.update({"q": q})
 
     return result
+
+
+@app.get("/products/")
+async def get_products(q: Annotated[str | None, Query(title="New title", description="New description", min_length=5, max_length=50, pattern="^fixedquery$")] = None):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+
+    return results
+
+
+@app.get("/positions/")
+async def get_positions(q: Annotated[str | None, Query(alias="item-query", deprecated=True)] = None):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+
+    return results
+
+
+@app.get("/things/")
+async def get_things(q: Annotated[str | None, Query(alias="item-query", include_in_schema=False)] = None):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+
+    return results
