@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from fastapi import FastAPI, Query, Path, Body
 from typing import Annotated
@@ -151,8 +151,10 @@ async def get_numbers(num_id: Annotated[int, Path(gt=0, le=1000)], q: str):
 
 class Parameter(BaseModel):
     name: str
-    descripton: str | None = None
-    price: float
+    descripton: str | None = Field(
+        default=None, title="The title of the parameter", max_length=300
+    )
+    price: float = Field(gt=0, description="This is the price of the parameter")
     tas: float | None = None
 
 
@@ -166,19 +168,19 @@ class Apples(BaseModel):
 async def update_parameters(
     param_id: Annotated[int, Path(ge=0, le=1000)],
     q: str | None = None,
-    # param: Parameter | None = None,
-    param: Annotated[Parameter, Body(embed=True)] = None,
-    # apples: Apples | None = None,
-    # importance: Annotated[int, Body(gt=0)] = None,
+    param: Parameter | None = None,
+    # param: Annotated[Parameter, Body(embed=True)] = None,
+    apples: Apples | None = None,
+    importance: Annotated[int, Body(gt=0)] = None,
 ):
     results = {"param_id": param_id}
     if q:
         results.update({"q": q})
     if param:
         results.update({"param": param})
-    # if apples:
-    #     results.update({"apples": apples})
-    # if importance:
-    #     results.update({"importance_id": importance})
+    if apples:
+        results.update({"apples": apples})
+    if importance:
+        results.update({"importance_id": importance})
 
     return results
