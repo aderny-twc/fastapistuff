@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel
 
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 from typing import Annotated
 
 app = FastAPI()
@@ -145,5 +145,40 @@ async def get_numbers(num_id: Annotated[int, Path(gt=0, le=1000)], q: str):
     results = {"num_id": num_id}
     if q:
         results.update({"q": q})
+
+    return results
+
+
+class Parameter(BaseModel):
+    name: str
+    descripton: str | None = None
+    price: float
+    tas: float | None = None
+
+
+class Apples(BaseModel):
+    weight: float
+    color: str
+    quantity: int = 1
+
+
+@app.put("/body_parameter/{param_id}")
+async def update_parameters(
+    param_id: Annotated[int, Path(ge=0, le=1000)],
+    q: str | None = None,
+    # param: Parameter | None = None,
+    param: Annotated[Parameter, Body(embed=True)] = None,
+    # apples: Apples | None = None,
+    # importance: Annotated[int, Body(gt=0)] = None,
+):
+    results = {"param_id": param_id}
+    if q:
+        results.update({"q": q})
+    if param:
+        results.update({"param": param})
+    # if apples:
+    #     results.update({"apples": apples})
+    # if importance:
+    #     results.update({"importance_id": importance})
 
     return results
