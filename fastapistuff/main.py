@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from fastapi import FastAPI, Query, Path, Body
 from typing import Annotated
@@ -100,7 +100,9 @@ async def update_item(item_id: int, item: OrderItem, q: str | None = None):
 
 
 @app.get("/products/")
-async def get_products(q: Annotated[str | None, Query(title="New title", description="New description", min_length=5, max_length=50, pattern="^fixedquery$")] = None):
+async def get_products(q: Annotated[
+    str | None, Query(title="New title", description="New description", min_length=5, max_length=50,
+                      pattern="^fixedquery$")] = None):
     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
     if q:
         results.update({"q": q})
@@ -127,7 +129,8 @@ async def get_things(q: Annotated[str | None, Query(alias="item-query", include_
 
 
 @app.get("/some_values/{value_id}")
-async def get_some_values(value_id: Annotated[int, Path(title="ID of a value")], q: Annotated[str | None, Query(alias="item-query")] = None):
+async def get_some_values(value_id: Annotated[int, Path(title="ID of a value")],
+                          q: Annotated[str | None, Query(alias="item-query")] = None):
     results = {"value_id": value_id}
     if q:
         results.update({"q": q})
@@ -166,12 +169,12 @@ class Apples(BaseModel):
 
 @app.put("/body_parameter/{param_id}")
 async def update_parameters(
-    param_id: Annotated[int, Path(ge=0, le=1000)],
-    q: str | None = None,
-    param: Parameter | None = None,
-    # param: Annotated[Parameter, Body(embed=True)] = None,
-    apples: Apples | None = None,
-    importance: Annotated[int, Body(gt=0)] = None,
+        param_id: Annotated[int, Path(ge=0, le=1000)],
+        q: str | None = None,
+        param: Parameter | None = None,
+        # param: Annotated[Parameter, Body(embed=True)] = None,
+        apples: Apples | None = None,
+        importance: Annotated[int, Body(gt=0)] = None,
 ):
     results = {"param_id": param_id}
     if q:
@@ -184,3 +187,31 @@ async def update_parameters(
         results.update({"importance_id": importance})
 
     return results
+
+
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
+
+
+class Orange(BaseModel):
+    name: str
+    description: str | None = None
+    tags: set[str] = set()
+    image: Image | None = None
+
+
+@app.put("/oranges/{orange_id}")
+async def update_orange(orange_id: int, orange: Orange):
+    result = {"orange_id": orange_id, "orange": orange}
+    return result
+
+
+@app.post("/orange_images/multiple/")
+async def create_multiple_orange_images(images: list[Image]):
+    return images
+
+
+@app.post("/index-weights/")
+async def create_index_weights(weights: dict[int, float]):
+    return weights
