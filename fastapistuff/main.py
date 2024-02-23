@@ -200,6 +200,19 @@ class Orange(BaseModel):
     tags: set[str] = set()
     image: Image | None = None
 
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "name": "Normal orange",
+                    "description": "A very good one",
+                    "tags": ["orange", "tasty", "sweet"],
+                    "image": [],
+                }
+            ]
+        }
+    }
+
 
 @app.put("/oranges/{orange_id}")
 async def update_orange(orange_id: int, orange: Orange):
@@ -215,3 +228,52 @@ async def create_multiple_orange_images(images: list[Image]):
 @app.post("/index-weights/")
 async def create_index_weights(weights: dict[int, float]):
     return weights
+
+
+class SomeApple(BaseModel):
+    name: str = Field(examples=["Golden"])
+    description: str | None = Field(default=None, examples=["A very sweet item"])
+    price: float = Field(examples=[1.5])
+    tax: float | None = Field(default=None, examples=[1.2])
+
+
+class Apple(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+
+@app.put("/apples/{apple_id}")
+async def update_orange(apple_id: int, apple: Annotated[Apple, Body(
+    openapi_examples={
+        "normal": {
+            "summary": "A normal example",
+            "description": "A **normal** item works correctly.",
+            "value": {
+                "name": "Foo",
+                "description": "A very nice Item",
+                "price": 35.4,
+                "tax": 3.2,
+            },
+        },
+        "converted": {
+            "summary": "An example with converted data",
+            "description": "FastAPI can convert price `strings` to actual `numbers` automatically",
+            "value": {
+                "name": "Bar",
+                "price": "35.4",
+            },
+        },
+        "invalid": {
+            "summary": "Invalid data is rejected with an error",
+            "value": {
+                "name": "Baz",
+                "price": "thirty five point four",
+            },
+        },
+    },
+),
+]):
+    result = {"apple_id": apple_id, "apple": apple}
+    return result
