@@ -1,12 +1,16 @@
 from fastapi import FastAPI
-# for serving static files
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
-app.mount
+FILE = "index.html"
 
 
-@app.get("/start/")
+@app.get("/start/", response_class=FileResponse)
 def return_start_html():
-    return
+    return FILE
+
+
+@app.post("/summer/")
+def return_sum(num1: float, num2: float):
+    return {"result": num1 + num2}
