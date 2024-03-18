@@ -20,8 +20,24 @@ def create_user(user: UserBase, db: Session = Depends(get_db)) -> UserDisplay:
     )
     return user
 
-# Read
 
+# Read
+@router.get("/")
+def read_all_users(db: Session = Depends(get_db)) -> list[UserDisplay]:
+    users = db_user.get_all_users(
+        db,
+    )
+    return users
+
+
+# Read one user
+@router.get("/{user_id}")
+def read_one_user(user_id: int, db: Session = Depends(get_db)) -> UserDisplay:
+    user = db_user.get_user(
+        db,
+        user_id
+    )
+    return user
 
 # Update
 
