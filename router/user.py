@@ -39,7 +39,23 @@ def read_one_user(user_id: int, db: Session = Depends(get_db)) -> UserDisplay:
     )
     return user
 
+
 # Update
+@router.post("/{user_id}")
+def update_user(user_id: int, user: UserBase, db: Session = Depends(get_db)):
+    status = db_user.update_user(
+        db,
+        user_id,
+        user,
+    )
+    return {"status": status}
 
 
 # Delete
+@router.delete("/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    status = db_user.delete_user(
+        db,
+        user_id,
+    )
+    return {"status": status}
