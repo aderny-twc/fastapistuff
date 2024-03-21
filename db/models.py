@@ -4,7 +4,7 @@ from db.database import Base
 
 
 class DbUser(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String)
     email = Column(String)
