@@ -2,10 +2,11 @@ from fastapi import FastAPI
 
 from db.database import engine
 from db import models
-from router import user
+from router import user, post
 
 app = FastAPI()
 app.include_router(user.router)
+app.include_router(post.router)
 
 
 @app.get("/")
