@@ -16,7 +16,6 @@ image_url_types = ["absolute", "relative"]
 
 @router.post("/")
 def create_post(post: PostBase, db: Session = Depends(get_db)) -> PostDisplay:
-
     if post.image_url_type not in image_url_types:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -28,3 +27,8 @@ def create_post(post: PostBase, db: Session = Depends(get_db)) -> PostDisplay:
         post,
     )
     return new_post
+
+
+@router.get("/")
+def get_all_posts(db: Session = Depends(get_db)) -> list[PostDisplay]:
+    return db_post.get_all(db)

@@ -37,7 +37,7 @@ class PostDisplay(BaseModel):
     image_url_type: str
     caption: str
     timestamp: datetime
-    user: User
+    user: User | None
 
     class Config:
         from_attributes = True
