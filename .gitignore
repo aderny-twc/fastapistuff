@@ -160,3 +160,4 @@ cython_debug/
 .idea/
 fastapi-examples.db
 img_api.db
+media

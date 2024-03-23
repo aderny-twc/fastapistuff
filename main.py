@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from db.database import engine
 from db import models
@@ -15,3 +16,5 @@ def index():
 
 
 models.Base.metadata.create_all(engine)
+
+app.mount("/media", StaticFiles(directory="media"), name="media")
