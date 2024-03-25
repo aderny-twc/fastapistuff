@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 from random import choice
 import string
 
+from auth.oauth2 import get_current_user
 from db.database import get_db
 from db import db_post
-from schemas import PostBase, PostDisplay
+from schemas import PostBase, PostDisplay, UserAuth
 
 router = APIRouter(
     prefix="/post",
@@ -19,7 +20,7 @@ image_url_types = ["absolute", "relative"]
 
 
 @router.post("/")
-def create_post(post: PostBase, db: Session = Depends(get_db)) -> PostDisplay:
+def create_post(post: PostBase, db: Session = Depends(get_db), _current_user: UserAuth = Depends(get_current_user)) -> PostDisplay:
     if post.image_url_type not in image_url_types:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -39,7 +40,7 @@ def get_all_posts(db: Session = Depends(get_db)) -> list[PostDisplay]:
 
 
 @router.post("/image")
-def load_image(image: UploadFile = File(...), db: Session = Depends(get_db)):
+def load_image(image: UploadFile = File(...), _current_user: UserAuth = Depends(get_current_user)):
     generated_name = ''.join(choice(string.ascii_letters) for i in range(6))
     suffix = f"_{generated_name}."
     filename = suffix.join(image.filename.rsplit(".", 1))

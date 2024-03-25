@@ -25,3 +25,8 @@ def delete_user(db: Session, id: int):
         return "OK"
 
     return "Not found"
+
+
+def get_user_by_username(db: Session, username: str):
+    user = db.query(DbUser).filter(DbUser.username == username).first()
+    return user if user else None
