@@ -19,6 +19,19 @@ def create(db: Session, post_request: PostBase):
     return new_post
 
 
+class NotAllowedDeletion(Exception):
+    pass
+
+
+def delete(db: Session, post_id: int, user_id: int):
+    post = db.query(DbPost).filter(DbPost.id == post_id, DbPost.user_id == user_id).first()
+    if post:
+        db.delete(post)
+        db.commit()
+    else:
+        raise NotAllowedDeletion
+
+
 def get_all(db: Session):
     all_posts = db.query(DbPost).all()
 

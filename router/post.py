@@ -9,6 +9,7 @@ import string
 from auth.oauth2 import get_current_user
 from db.database import get_db
 from db import db_post
+from db.db_post import NotAllowedDeletion
 from schemas import PostBase, PostDisplay, UserAuth
 
 router = APIRouter(
@@ -32,6 +33,19 @@ def create_post(post: PostBase, db: Session = Depends(get_db), _current_user: Us
         post,
     )
     return new_post
+
+
+@router.delete("/{post_id}")
+def delete_post(post_id: int, db: Session = Depends(get_db), _current_user: UserAuth = Depends(get_current_user)):
+    try:
+        db_post.delete(
+            db,
+            post_id,
+            _current_user.id,
+        )
+    except NotAllowedDeletion:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This is not your post")
+    return {"status": "OK"}
 
 
 @router.get("/")
