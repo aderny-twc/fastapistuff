@@ -31,6 +31,15 @@ class PostBase(BaseModel):
     creator_id: int
 
 
+class Comment(BaseModel):
+    text: str
+    username: str
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class PostDisplay(BaseModel):
     id: int
     image_url: str
@@ -38,6 +47,7 @@ class PostDisplay(BaseModel):
     caption: str
     timestamp: datetime
     user: User | None
+    comments: list[Comment]
 
     class Config:
         from_attributes = True
@@ -47,3 +57,9 @@ class UserAuth(BaseModel):
     id: int
     username: str
     email: str
+
+
+class CommentBase(BaseModel):
+    username: str
+    text: str
+    post_id: int
