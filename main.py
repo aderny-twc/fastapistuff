@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from db.database import engine
 from db import models
@@ -16,6 +17,20 @@ app.include_router(authentication.router)
 @app.get("/")
 def index():
     return {"message": "Hello world!"}
+
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 models.Base.metadata.create_all(engine)
