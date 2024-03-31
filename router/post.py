@@ -2,12 +2,12 @@ import shutil
 
 from fastapi import APIRouter, Depends, status, UploadFile, File
 from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from random import choice
 import string
 
 from auth.oauth2 import get_current_user
-from db.database import get_db
+from db.database import async_session
 from db import db_post
 from db.db_post import NotAllowedDeletion
 from schemas import PostBase, PostDisplay, UserAuth
@@ -21,25 +21,25 @@ image_url_types = ["absolute", "relative"]
 
 
 @router.post("/")
-def create_post(post: PostBase, db: Session = Depends(get_db), _current_user: UserAuth = Depends(get_current_user)) -> PostDisplay:
+async def create_post(post: PostBase, session: AsyncSession = Depends(async_session), _current_user: UserAuth = Depends(get_current_user)) -> PostDisplay:
     if post.image_url_type not in image_url_types:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Image types might be only {image_url_types}"
         )
 
-    new_post = db_post.create(
-        db,
+    new_post = await db_post.create(
+        session,
         post,
     )
     return new_post
 
 
 @router.delete("/{post_id}")
-def delete_post(post_id: int, db: Session = Depends(get_db), _current_user: UserAuth = Depends(get_current_user)):
+async def delete_post(post_id: int, session: AsyncSession = Depends(async_session), _current_user: UserAuth = Depends(get_current_user)):
     try:
-        db_post.delete(
-            db,
+        await db_post.delete(
+            session,
             post_id,
             _current_user.id,
         )
@@ -49,8 +49,8 @@ def delete_post(post_id: int, db: Session = Depends(get_db), _current_user: User
 
 
 @router.get("/")
-def get_all_posts(db: Session = Depends(get_db)) -> list[PostDisplay]:
-    return db_post.get_all(db)
+async def get_all_posts(session: AsyncSession = Depends(async_session)) -> list[PostDisplay]:
+    return await db_post.get_all(session)
 
 
 @router.post("/image")

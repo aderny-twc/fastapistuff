@@ -33,6 +33,10 @@ app.add_middleware(
 )
 
 
-models.Base.metadata.create_all(engine)
+@app.on_event("startup")
+async def init_tables():
+    async with engine.begin() as conn:
+        # await conn.run_sync(models.Base.metadata.drop_all)
+        await conn.run_sync(models.Base.metadata.create_all)
 
 app.mount("/media", StaticFiles(directory="media"), name="media")

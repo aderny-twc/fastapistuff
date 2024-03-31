@@ -1,32 +1,40 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+import sqlalchemy
 from schemas import UserBase
 from db.models import DbUser
 from db.hash import Hash
 
 
-def create_user(db: Session, request: UserBase):
+async def create_user(session: AsyncSession, request: UserBase):
     new_user = DbUser(
         username=request.username,
         email=request.email,
         password=Hash.bcrypt(request.password),
     )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    session.add(new_user)
+    await session.commit()
+    await session.refresh(new_user)
     return new_user
 
 
-def delete_user(db: Session, id: int):
-    user = db.query(DbUser).filter(DbUser.id == id).first()
+async def delete_user(session: AsyncSession, id: int):
+    query = sqlalchemy.select(DbUser).where(DbUser.id == id).limit(1)
+    user = await session.execute(query)
 
     if user:
-        db.delete(user)
-        db.commit()
+        query = sqlalchemy.delete(DbUser).where(DbUser.id == id)
+        await session.execute(query)
+        await session.commit()
         return "OK"
 
     return "Not found"
 
 
-def get_user_by_username(db: Session, username: str):
-    user = db.query(DbUser).filter(DbUser.username == username).first()
-    return user if user else None
+async def get_user_by_username(session: AsyncSession, username: str):
+    users_query = await session.execute(
+        sqlalchemy.select(DbUser)
+        .where(DbUser.username == username)
+        .limit(1)
+    )
+    user = users_query.first()
+    return user[0] if user else None

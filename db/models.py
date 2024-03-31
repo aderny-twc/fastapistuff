@@ -21,8 +21,8 @@ class DbPost(Base):
     caption = Column(String)
     timestamp = Column(DateTime)
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("DbUser", back_populates="items")
-    comments = relationship("DbComment", back_populates="post")
+    user = relationship("DbUser", back_populates="items", lazy="selectin")
+    comments = relationship("DbComment", back_populates="post", lazy="selectin")
 
 
 class DbComment(Base):

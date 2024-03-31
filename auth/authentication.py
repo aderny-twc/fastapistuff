@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth.oauth2 import create_access_token
 from db import db_user
 from db.hash import Hash
 
-from db.database import get_db
+from db.database import async_session
 
 router = APIRouter(
     tags=["authentication", ]
@@ -14,8 +14,9 @@ router = APIRouter(
 
 
 @router.post("/login")
-def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db_user.get_user_by_username(db, username=request.username)
+async def login(request: OAuth2PasswordRequestForm = Depends(), session: AsyncSession = Depends(async_session)):
+    user = await db_user.get_user_by_username(session, username=request.username)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
